@@ -1,6 +1,6 @@
 import requests
 from typing import Optional, Dict
-from .api_base import BaseAPI
+from .api import BaseAPI
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 
