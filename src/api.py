@@ -30,11 +30,17 @@ class AeroplanesAPI(BaseAPI):
     def get_coordinates(self, country: str) -> Optional[dict[str, float]]:
         """Получить boundingbox страны через Nominatim."""
         try:
+            params: dict[str, str | int] = {
+                "q": country,
+                "format": "json",
+                "limit": 1,
+            }
             response = self.session.get(
                 NOMINATIM_URL,
-                params={"q": country, "format": "json", "limit": 1},
+                params=params,
                 timeout=10,
             )
+
             response.raise_for_status()
             data = response.json()
         except (requests.RequestException, ValueError) as error:

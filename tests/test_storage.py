@@ -11,8 +11,10 @@ def saver(tmp_path: Path) -> JSONSaver:
     return JSONSaver(filepath=tmp_path / "aircrafts.json")
 
 
-def make_plane(callsign: str, altitude: float = 5000) -> Aeroplane:
-    return Aeroplane(callsign, "Spain", 200, altitude)
+def make_plane(callsign: str, altitude: float = 5000)\
+        -> Aeroplane:
+    return Aeroplane(callsign, "Spain",
+                     200, altitude)
 
 
 def test_add_and_get(saver: JSONSaver):
@@ -31,7 +33,8 @@ def test_add_duplicate_ignored(saver: JSONSaver):
 
 def test_get_by_country(saver: JSONSaver):
     saver.add_aeroplane(make_plane("AAA"))
-    saver.add_aeroplane(Aeroplane("BBB", "France", 150, 3000))
+    saver.add_aeroplane(Aeroplane("BBB", "France",
+                                  150, 3000))
     assert len(saver.get_aeroplanes(country="spain")) == 1
     assert len(saver.get_aeroplanes(country="France")) == 1
 

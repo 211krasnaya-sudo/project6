@@ -4,7 +4,8 @@ from src.aeroplane import Aeroplane
 
 
 def test_create_valid_aeroplane():
-    plane = Aeroplane("UAL1621", "United States", 268.79, 10203.18)
+    plane = Aeroplane("UAL1621", "United States",
+                      268.79, 10203.18)
     assert plane.callsign == "UAL1621"
     assert plane.origin_country == "United States"
     assert plane.velocity == 268.79
@@ -23,23 +24,28 @@ def test_validation_errors(callsign, velocity, altitude):
 
 
 def test_compare_by_altitude():
-    low = Aeroplane("LOW1", "US", 100, 1000)
-    high = Aeroplane("HIGH1", "US", 100, 10000)
+    low = Aeroplane("LOW1", "US", 100,
+                    1000)
+    high = Aeroplane("HIGH1", "US", 100,
+                     10000)
     assert low < high
     assert high > low
     assert (low == high) is False
 
 
 def test_compare_by_velocity():
-    slow = Aeroplane("SLOW", "US", 50, 1000)
-    fast = Aeroplane("FAST", "US", 300, 1000)
+    slow = Aeroplane("SLOW", "US", 50,
+                     1000)
+    fast = Aeroplane("FAST", "US", 300,
+                     1000)
     assert slow.compare_by_velocity(fast) == -1
     assert fast.compare_by_velocity(slow) == 1
     assert slow.compare_by_velocity(slow) == 0
 
 
 def test_compare_with_not_aeroplane():
-    plane = Aeroplane("X", "US", 100, 1000)
+    plane = Aeroplane("X", "US", 100,
+                      1000)
     with pytest.raises(TypeError):
         plane.compare_by_velocity("not a plane")
 
@@ -59,7 +65,8 @@ def test_cast_to_object_list_skips_invalid():
 
 
 def test_str_is_readable():
-    plane = Aeroplane("UAL1621", "United States", 268.79, 10203.18)
+    plane = Aeroplane("UAL1621", "United States",
+                      268.79, 10203.18)
     text = str(plane)
     assert "UAL1621" in text
     assert "United States" in text

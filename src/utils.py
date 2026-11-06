@@ -1,41 +1,52 @@
-import requests
-from typing import Optional, Dict
-from .api import BaseAPI
+"""Функции фильтрации, сортировки и вывода самолётов."""
+from typing import List
 
-NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
+from src.aeroplane import Aeroplane
 
-class NominatimAPI(BaseAPI):
-    def __init__(self, user_agent: str = "aircraft_tracker"):
-        self.session = requests.Session()
-        self.session.headers.update({"User-Agent": user_agent})
 
-    def get_country_bbox(self, country_name: str) -> Optional[Dict[str, float]]:
-        params = {
-            "q": country_name,
-            "format": "json",
-            "limit": 1,
-            "countrycodes": ""  # чтобы искать по названию страны
-        }
-        resp = self.session.get(NOMINATIM_URL, params=params, timeout=10)
-        resp.raise_for_status()
-        data = resp.json()
+def filter_aeroplanes(
+    aeroplanes: List[Aeroplane], countries: List[str]
+) -> List[Aeroplane]:
+    """Фильтр по странам регистрации (регистронезависимо)."""
+    if not countries:
+        return aeroplanes
+    needles = [c.lower() for c in countries]
+    return [
+        p for p in aeroplanes
+        if p.origin_country.lower() in needles
+    ]
 
-        if not data:
-            return None
 
-        result = data[0]
-        bbox_str = result.get("boundingbox")
-        if not bbox_str:
-            return None
+def get_aeroplanes_by_altitude(
+    aeroplanes: List[Aeroplane], altitude_range: str
+) -> List[Aeroplane]:
+    """Фильтр по диапазону высот. Пример строки: '100-1500'."""
+    try:
+        parts = [p.strip() for p in altitude_range.split("-")]
+        min_alt, max_alt = float(parts[0]), float(parts[1])
+    except (ValueError, IndexError):
+        raise ValueError("Диапазон высот задан неверно. Пример: 100-1500")
+    if min_alt > max_alt:
+        raise ValueError("Минимум высоты больше максимума")
+    return [p for p in aeroplanes if min_alt <= p.baro_altitude <= max_alt]
 
-        # boundingbox: ["south", "north", "west", "east"]
-        try:
-            south, north, west, east = map(float, bbox_str)
-            return {"south": south, "north": north, "west": west, "east": east}
-        except (ValueError, TypeError):
-            return None
 
-    def get_aircrafts_in_bbox(self, south: float, north: float, west: float, east: float) -> list[dict]:
-        # Этот метод здесь не используется напрямую: за самолёты отвечает OpenSky.
-        # Но он нужен, чтобы удовлетворить интерфейс BaseAPI.
-        return []
+def sort_aeroplanes(aeroplanes: List[Aeroplane]) -> List[Aeroplane]:
+    """Сортировка по высоте: DESC."""
+    return sorted(aeroplanes, key=lambda p: p.baro_altitude, reverse=True)
+
+
+def get_top_aeroplanes(
+    aeroplanes: List[Aeroplane], top_n: int
+) -> List[Aeroplane]:
+    """Топ N самолётов."""
+    return aeroplanes[:top_n]
+
+
+def print_aeroplanes(aeroplanes: List[Aeroplane]) -> None:
+    """Человекочитаемый вывод списка самолётов."""
+    if not aeroplanes:
+        print("Самолётов не найдено")
+        return
+    for index, plane in enumerate(aeroplanes, start=1):
+        print(f"{index}. {plane}")

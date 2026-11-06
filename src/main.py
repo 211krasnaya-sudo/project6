@@ -1,15 +1,13 @@
-# src/main.py
 """Точка входа: взаимодействие с пользователем через консоль."""
+from pathlib import Path
+
 from src.aeroplane import Aeroplane
 from src.api import AeroplanesAPI
 from src.storage import JSONSaver
-from src.utils import (
-    filter_aeroplanes,
-    get_aeroplanes_by_altitude,
-    get_top_aeroplanes,
-    print_aeroplanes,
-    sort_aeroplanes,
-)
+from src.utils import (filter_aeroplanes, get_aeroplanes_by_altitude,
+                       get_top_aeroplanes, print_aeroplanes, sort_aeroplanes)
+
+DATA_FILE = Path("data/aircrafts.json")
 
 MENU = """
 Выберите действие:
@@ -22,7 +20,7 @@ MENU = """
 
 def user_interaction() -> None:
     api = AeroplanesAPI()
-    saver = JSONSaver.__new__(JSONSaver)  # тесты подменяют путь
+    saver = JSONSaver(DATA_FILE)
 
     country = input("Введите название страны: ").strip()
     if not country:
