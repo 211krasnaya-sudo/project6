@@ -7,13 +7,19 @@ from src.aeroplane import Aeroplane
 def filter_aeroplanes(
     aeroplanes: List[Aeroplane], countries: List[str]
 ) -> List[Aeroplane]:
-    """Фильтр по странам регистрации (регистронезависимо)."""
+    """Фильтр по странам регистрации.
+
+    Поддерживает частичное совпадение и названия из нескольких слов:
+    каждое введённое слово ищется как подстрока в названии страны.
+    """
     if not countries:
         return aeroplanes
-    needles = [c.lower() for c in countries]
+    needles = [c.strip().lower() for c in countries if c.strip()]
+    if not needles:
+        return aeroplanes
     return [
         p for p in aeroplanes
-        if p.origin_country.lower() in needles
+        if any(needle in p.origin_country.lower() for needle in needles)
     ]
 
 

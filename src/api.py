@@ -30,31 +30,30 @@ class AeroplanesAPI(BaseAPI):
     def get_coordinates(self, country: str) -> Optional[dict[str, float]]:
         """Получить boundingbox страны через Nominatim."""
         try:
-            params: dict[str, str | int] = {
-                "q": country,
-                "format": "json",
-                "limit": 1,
-            }
             response = self.session.get(
                 NOMINATIM_URL,
-                params=params,
+                params={
+                    "q": country,
+                    "format": "json",
+                    "limit": "1",
+                },
                 timeout=10,
             )
-
             response.raise_for_status()
             data = response.json()
-        except (requests.RequestException, ValueError) as error:
+
+            if not data:
+                return None
+            bbox = data[0].get("boundingbox")
+            if not bbox or len(bbox) != 4:
+                return None
+            south, north, west, east = map(float, bbox)
+            return {"south": south, "north": north,
+                    "west": west, "east": east}
+        except (requests.RequestException, ValueError, TypeError,
+                AttributeError, IndexError, KeyError) as error:
             print(f"Ошибка запроса к Nominatim: {error}")
             return None
-
-        if not data:
-            return None
-        bbox = data[0].get("boundingbox")
-        if not bbox or len(bbox) != 4:
-            return None
-        south, north, west, east = map(float, bbox)
-        return {"south": south, "north": north,
-                "west": west, "east": east}
 
     def get_aeroplanes(self, country: str) -> list[dict[str, Any]]:
         """Получить самолёты в воздушном пространстве страны."""
